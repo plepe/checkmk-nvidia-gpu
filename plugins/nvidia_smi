@@ -1,0 +1,98 @@
+#!/usr/bin/python3
+# -*- encoding: utf-8; py-indent-offset: 4 -*-
+# +------------------------------------------------------------------+
+# |             ____ _               _        __  __ _  __           |
+# |            / ___| |__   ___  ___| | __   |  \/  | |/ /           |
+# |           | |   | '_ \ / _ \/ __| |/ /   | |\/| | ' /            |
+# |           | |___| | | |  __/ (__|   <    | |  | | . \            |
+# |            \____|_| |_|\___|\___|_|\_\___|_|  |_|_|\_\           |
+# |                                                                  |
+# | Copyright Mathias Kettner 2012             mk@mathias-kettner.de |
+# +------------------------------------------------------------------+
+#
+# This file is part of Check_MK.
+# The official homepage is at http://mathias-kettner.de/check_mk.
+#
+# check_mk is free software;  you can redistribute it and/or modify it
+# under the  terms of the  GNU General Public License  as published by
+# the Free Software Foundation in version 2.  check_mk is  distributed
+# in the hope that it will be useful, but WITHOUT ANY WARRANTY;  with-
+# out even the implied warranty of  MERCHANTABILITY  or  FITNESS FOR A
+# PARTICULAR PURPOSE. See the  GNU General Public License for more de-
+# ails.  You should have  received  a copy of the  GNU  General Public
+# License along with GNU Make; see the file  COPYING.  If  not,  write
+# to the Free Software Foundation, Inc., 51 Franklin St,  Fifth Floor,
+# Boston, MA 02110-1301 USA.
+
+#######################################
+# Script developed by S M Raju
+#######################################
+
+from subprocess import Popen, PIPE
+import xml.dom.minidom
+from functools import reduce
+
+print("<<<nvidia_smi>>>")
+i = 0
+nvidiaSMI = xml.dom.minidom.parseString(Popen(["nvidia-smi", "-q", "-x"], stdout=PIPE).communicate()[0])
+
+for gpu in nvidiaSMI.getElementsByTagName('gpu'):
+    gpu_id = int(gpu
+                .getElementsByTagName("minor_number")[0]
+                .childNodes[0].data.split()[0])
+
+    names = list(gpu
+                .getElementsByTagName("product_name")[0]
+                .childNodes[0].data.split())
+    gpu_name = reduce(lambda x,y:x+y,names)
+
+    try:
+        fan_speed = int(gpu
+                        .getElementsByTagName("fan_speed")[0]
+                        .childNodes[0].data.split()[0])
+    except ValueError:
+        fan_speed: int = 0
+
+    gpu_utilization = int(gpu
+                        .getElementsByTagName("utilization")[0]
+                        .getElementsByTagName("gpu_util")[0]
+                        .childNodes[0].data.split()[0])
+
+    mem_utilization = int(gpu
+                        .getElementsByTagName("utilization")[0]
+                        .getElementsByTagName("memory_util")[0]
+                        .childNodes[0].data.split()[0])
+
+    ecc_errors_1 = str(gpu
+                    .getElementsByTagName("ecc_errors")[0]
+                    .getElementsByTagName("aggregate")[0]
+                    .getElementsByTagName("sram_uncorrectable")[0]
+                    .childNodes[0].data)
+
+    ecc_errors_2 = str(gpu
+                    .getElementsByTagName("ecc_errors")[0]
+                    .getElementsByTagName("aggregate")[0]
+                    .getElementsByTagName("dram_uncorrectable")[0]
+                    .childNodes[0].data)
+
+    try:
+        temperature = int(gpu
+                        .getElementsByTagName("temperature")[0]
+                        .getElementsByTagName("gpu_temp")[0]
+                        .childNodes[0].data.split()[0])
+    except ValueError:
+        temperature: int = 0
+
+    power_draw = float(gpu
+                    .getElementsByTagName("power_readings")[0]
+                    .getElementsByTagName("power_draw")[0]
+                    .childNodes[0].data.split()[0])
+
+    power_limit = float(gpu
+                    .getElementsByTagName("power_readings")[0]
+                    .getElementsByTagName("power_limit")[0]
+                    .childNodes[0].data.split()[0])
+
+    print(f"{gpu_id} {gpu_name} {fan_speed} {gpu_utilization} {mem_utilization} {ecc_errors_1} {ecc_errors_2} {temperature} {power_draw} {power_limit}")
+
+    i +=1

@@ -63,11 +63,14 @@ for gpu in nvidiaSMI.getElementsByTagName('gpu'):
                         .getElementsByTagName("memory_util")[0]
                         .childNodes[0].data.split()[0])
 
-    ecc_errors_1 = str(gpu
+    ecc_errors_1 = (gpu
                     .getElementsByTagName("ecc_errors")[0]
                     .getElementsByTagName("aggregate")[0]
-                    .getElementsByTagName("sram_uncorrectable")[0]
-                    .childNodes[0].data)
+                    .getElementsByTagName("sram_uncorrectable"))
+    if len(ecc_errors_1):
+        ecc_errors_1 = str(ecc_errors_1[0].childNodes[0].data)
+    else:
+        ecc_errors_1 = 'N/A'
 
     ecc_errors_2 = str(gpu
                     .getElementsByTagName("ecc_errors")[0]

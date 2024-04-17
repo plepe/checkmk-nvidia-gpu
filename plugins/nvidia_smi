@@ -72,11 +72,14 @@ for gpu in nvidiaSMI.getElementsByTagName('gpu'):
     else:
         ecc_errors_1 = 'N/A'
 
-    ecc_errors_2 = str(gpu
+    ecc_errors_2 = (gpu
                     .getElementsByTagName("ecc_errors")[0]
                     .getElementsByTagName("aggregate")[0]
-                    .getElementsByTagName("dram_uncorrectable")[0]
-                    .childNodes[0].data)
+                    .getElementsByTagName("dram_uncorrectable"))
+    if len(ecc_errors_2):
+        ecc_errors_2 = str(ecc_errors_2[0].childNodes[0].data)
+    else:
+        ecc_errors_2 = 'N/A'
 
     try:
         temperature = int(gpu

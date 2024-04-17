@@ -84,13 +84,13 @@ for gpu in nvidiaSMI.getElementsByTagName('gpu'):
         temperature: int = 0
 
     power_draw = float(gpu
-                    .getElementsByTagName("power_readings")[0]
+                    .getElementsByTagName("gpu_power_readings")[0]
                     .getElementsByTagName("power_draw")[0]
                     .childNodes[0].data.split()[0])
 
     power_limit = float(gpu
-                    .getElementsByTagName("power_readings")[0]
-                    .getElementsByTagName("power_limit")[0]
+                    .getElementsByTagName("gpu_power_readings")[0]
+                    .getElementsByTagName("max_power_limit")[0]
                     .childNodes[0].data.split()[0])
 
     print(f"{gpu_id} {gpu_name} {fan_speed} {gpu_utilization} {mem_utilization} {ecc_errors_1} {ecc_errors_2} {temperature} {power_draw} {power_limit}")
